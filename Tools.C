@@ -43,12 +43,12 @@
 */
 uint64_t Tools::buildLong(uint8_t bytes[LONGSIZE])
 {
-  uint64_t answer = 0;
-  for (uint32_t i = 0; i < LONGSIZE; i++)
-  {
-	  answer |= (uint64_t)bytes[i] << (i * LONGSIZE);
-  }
-  return answer;
+	uint64_t answer = 0;
+	for (uint32_t i = 0; i < LONGSIZE; i++)
+	{
+		answer |= (uint64_t)bytes[i] << (i * LONGSIZE);
+	}
+	return answer;
 }
 
 /** 
@@ -72,12 +72,12 @@ uint64_t Tools::buildLong(uint8_t bytes[LONGSIZE])
 */
 uint64_t Tools::getByte(uint64_t source, int32_t byteNum)
 {
-  if (byteNum < 0 || byteNum > 7)
-  {
-	return 0;
-  }
-  uint64_t answer =  source >> (byteNum * 8) & 0xFF;
-  return answer;
+	if (byteNum < 0 || byteNum > 7)
+	{
+		return 0;
+	}
+	uint64_t answer =  source >> (byteNum * 8) & 0xFF;
+	return answer;
 }
 
 /**
@@ -107,13 +107,13 @@ uint64_t Tools::getByte(uint64_t source, int32_t byteNum)
  */
 uint64_t Tools::getBits(uint64_t source, int32_t low, int32_t high)
 {
-  if (low < 0 || high > 63)
-  {
-	return 0;
-  }
-  uint64_t answer =  source << (63 - high);
-  answer = answer >> ((63 - high) + low);
-  return answer;
+	if (low < 0 || high > 63)
+	{
+		return 0;
+	}
+	uint64_t answer = source << (63 - high);
+	answer = answer >> ((63 - high) + low);
+	return answer;
 }
 
 
@@ -141,7 +141,16 @@ uint64_t Tools::getBits(uint64_t source, int32_t low, int32_t high)
  */
 uint64_t Tools::setBits(uint64_t source, int32_t low, int32_t high)
 {
-  return 0;
+	if (low < 0 || high > 63)
+	{
+		return source;
+	}
+	uint64_t source1 = 0xffffffffffffffff;
+	source1 = source1 << (63 - high);
+	source1 = source1 >> ((63 - high) + low);
+	source1 = source1 << low;
+	uint64_t answer = source | source1;
+	return answer;
 }
 
 /**
@@ -166,7 +175,13 @@ uint64_t Tools::setBits(uint64_t source, int32_t low, int32_t high)
  */
 uint64_t Tools::clearBits(uint64_t source, int32_t low, int32_t high)
 {
-  return 0;
+	if (low < 0 || high > 63)
+	{
+		return source;
+	}
+	uint64_t source1 = ~(((1ULL << (high - low + 1)) - 1) << low);
+	uint64_t answer = source & source1; 
+	return answer;
 }
 
 
@@ -222,7 +237,38 @@ uint64_t Tools::copyBits(uint64_t source, uint64_t dest,
  */
 uint64_t Tools::setByte(uint64_t source, int32_t byteNum)
 {
-  return 0;
+    uint64_t source1 = 0x0000000000000000;
+	switch (byteNum) {
+        case 0:
+            source1 = 0x00000000000000ff;
+            break;
+        case 1:
+            source1 = 0x000000000000ff00;
+            break;
+        case 2:
+            source1 = 0x0000000000ff0000;
+            break;
+        case 3:
+            source1 = 0x00000000ff000000;
+            break;
+        case 4:
+            source1 = 0x000000ff00000000;
+            break;
+        case 5:
+            source1 = 0x0000ff0000000000;
+            break;
+        case 6:
+            source1 = 0x00ff000000000000;
+            break;
+        case 7:
+            source1 = 0xff00000000000000;
+            break;
+        default:
+			source;
+            break;
+    }
+    uint64_t answer = source | source1;
+    return answer;
 }
 
 
