@@ -212,7 +212,15 @@ uint64_t Tools::clearBits(uint64_t source, int32_t low, int32_t high)
 uint64_t Tools::copyBits(uint64_t source, uint64_t dest, 
                          int32_t srclow, int32_t dstlow, int32_t length)
 {
-   return 0; 
+	if (srclow < 0 || srclow > 63 || dstlow < 0 || dstlow > 63 ||
+        srclow + length - 1 > 63 || dstlow + length - 1 > 63) {
+        return dest;
+    }
+	uint64_t source1 = getBits(source,srclow,(srclow + (length - 1)));
+    uint64_t dest1 = clearBits(dest,dstlow,(dstlow + (length - 1)));
+	source1 = source1 << dstlow;
+	uint64_t answer = source1 | dest1;
+	return answer; 
 }
 
 
@@ -290,7 +298,8 @@ uint64_t Tools::setByte(uint64_t source, int32_t byteNum)
  */
 uint64_t Tools::sign(uint64_t source)
 {
-  return 0;
+	uint64_t answer = (source >> 63) & 1;
+	return answer;
 }
 
 /**
@@ -314,13 +323,20 @@ uint64_t Tools::sign(uint64_t source)
  */
 bool Tools::addOverflow(uint64_t op1, uint64_t op2)
 {
-  //Hint: If an overflow occurs then it overflows by just one bit.
-  //      In other words, 65 bits would be needed to store the arithmetic 
-  //      result instead of 64 and the sign bit in the stored result (bit 63) is incorrect. 
-  //      Thus, the way to check for an overflow is to compare the signs of the
-  //      operand and the result.  For example, if you add two positive numbers, 
-  //      the result should be positive, otherwise an overflow occurred.
-  return false;
+	//Hint: If an overflow occurs then it overflows by just one bit.
+	//      In other words, 65 bits would be needed to store the arithmetic 
+	//      result instead of 64 and the sign bit in the stored result (bit 63) is incorrect. 
+	//      Thus, the way to check for an overflow is to compare the signs of the
+	//      operand and the result.  For example, if you add two positive numbers, 
+	//      the result should be positive, otherwise an overflow occurred.
+	uint8_t num1 = sign(op1);
+	uint8_t num2 = sign(op2);
+	int64_t sop1 = op1;
+	int64_t sop2 = op2;
+	int64_t add1 = num1 == num2 && (((sop1 + sop2) >= 0) && num1 == 1); 
+	int64_t add2 = ((sop1 + sop2) < 0) && num1 == 0;
+	int64_t answer = add1 || add2;
+	return answer;
 }
 
 /**
@@ -345,9 +361,16 @@ bool Tools::addOverflow(uint64_t op1, uint64_t op2)
  */
 bool Tools::subOverflow(uint64_t op1, uint64_t op2)
 {
-  //See hint for addOverflow
-  //Note: you can not simply use addOverflow in this function.  If you negate
-  //op1 in order to an add, you may get an overflow. 
-  //NOTE: the subtraction is op2 - op1 (not op1 - op2).
-  return false;
+	//See hint for addOverflow
+	//Note: you can not simply use addOverflow in this function.  If you negate
+	//op1 in order to an add, you may get an overflow. 
+	//NOTE: the subtraction is op2 - op1 (not op1 - op2).
+	uint8_t num1 = sign(op1);
+	uint8_t num2 = sign(op2);
+	int64_t sop1 = op1;
+	int64_t sop2 = op2;
+	int64_t sub1 = num1 != num2 && (((sop2 - sop1) >= 0) && num1 == 0); 
+	int64_t sub2 = ((sop2 - sop1) < 0) && num1 == 1;
+	int64_t answer = sub1 || sub2;
+	return answer;
 }
